@@ -1,30 +1,6 @@
 ///// Role /////
 /**
  * @swagger
- * components:
- *   schemas:
- *     Role:
- *       type: object
- *       properties:
- *         _id:
- *           type: string
- *         name:
- *           type: string
- *         slug:
- *           type: string
- *         status:
- *           type: string
- *           enum: [active, inactive]
- *         createdAt:
- *           type: string
- *           format: date-time
- *         updatedAt:
- *           type: string
- *           format: date-time
- */
-
-/**
- * @swagger
  * /api/v1/roles:
  *   post:
  *     summary: Create a new role
@@ -542,4 +518,350 @@
  *         description: Invalid ID format
  *       404:
  *         description: Category not found
+ */
+
+///// Product /////
+/**
+ * @swagger
+ * /api/v1/products:
+ *   post:
+ *     summary: Create a new product
+ *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [name, sku, categoryId, quantity, price, cost]
+ *             properties:
+ *               name:
+ *                 type: string
+ *               sku:
+ *                 type: string
+ *               categoryId:
+ *                 type: string
+ *               quantity:
+ *                 type: number
+ *               reorderLevel:
+ *                 type: number
+ *               price:
+ *                 type: number
+ *               cost:
+ *                 type: number
+ *     responses:
+ *       201:
+ *         description: Product created successfully
+ *       400:
+ *         description: Missing required fields
+ */
+
+/**
+ * @swagger
+ * /api/v1/products:
+ *   get:
+ *     summary: Get all products
+ *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of products
+ */
+
+/**
+ * @swagger
+ * /api/v1/products/{id}:
+ *   get:
+ *     summary: Get product by ID
+ *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Product ID
+ *     responses:
+ *       200:
+ *         description: Product found
+ *       404:
+ *         description: Product not found
+ */
+
+/**
+ * @swagger
+ * /api/v1/products/{id}:
+ *   patch:
+ *     summary: Update a product
+ *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Product ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               sku:
+ *                 type: string
+ *               categoryId:
+ *                 type: string
+ *               quantity:
+ *                 type: number
+ *               reorderLevel:
+ *                 type: number
+ *               price:
+ *                 type: number
+ *               cost:
+ *                 type: number
+ *     responses:
+ *       200:
+ *         description: Product updated successfully
+ */
+
+/**
+ * @swagger
+ * /api/v1/products/{id}:
+ *   delete:
+ *     summary: Delete a product
+ *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Product ID
+ *     responses:
+ *       200:
+ *         description: Product deleted successfully
+ */
+
+/**
+ * @swagger
+ * /api/v1/products/{id}/add-quantity:
+ *   patch:
+ *     summary: Add quantity to a product
+ *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The product ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               addedQuantity:
+ *                 type: number
+ *                 example: 10
+ *     responses:
+ *       200:
+ *         description: Quantity added successfully
+ *       400:
+ *         description: Invalid input or product ID
+ *       404:
+ *         description: Product not found
+ */
+
+///// Sale /////
+/**
+ * @swagger
+ * /api/v1/sales:
+ *   post:
+ *     summary: Create a new sale
+ *     tags: [Sales]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       description: Sale details with list of products and optional sale date
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - products
+ *             properties:
+ *               saleDate:
+ *                 type: string
+ *                 format: date-time
+ *                 example: 2025-05-20T15:30:00.000Z
+ *               products:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   required:
+ *                     - productId
+ *                     - quantity
+ *                   properties:
+ *                     productId:
+ *                       type: string
+ *                       example: "6650e65d3f607912e2a419b1"
+ *                     quantity:
+ *                       type: number
+ *                       example: 3
+ *     responses:
+ *       201:
+ *         description: Sale created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Sale'
+ *       400:
+ *         description: Bad request or validation error
+ *       401:
+ *         description: Unauthorized
+ */
+
+/**
+ * @swagger
+ * /api/v1/sales/{id}:
+ *   get:
+ *     summary: Get a single sale by ID
+ *     tags: [Sales]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Sale ID
+ *     responses:
+ *       200:
+ *         description: Sale fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Sale'
+ *       400:
+ *         description: Invalid ID
+ *       404:
+ *         description: Sale not found
+ */
+
+/**
+ * @swagger
+ * /api/v1/sales:
+ *   get:
+ *     summary: Get a single sale by ID
+ *     tags: [Sales]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Sale fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Sale'
+ *       400:
+ *         description: Invalid ID
+ *       404:
+ *         description: Sale not found
+ */
+
+///// Stock Alert /////
+
+/**
+ * @swagger
+ * /api/v1/stock-alerts:
+ *   get:
+ *     summary: Get all stock alerts for the current user
+ *     tags: [StockAlerts]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of stock alerts
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/StockAlert'
+ */
+
+/**
+ * @swagger
+ * /api/v1/stock-alerts:
+ *   post:
+ *     summary: Create a stock alert
+ *     tags: [StockAlerts]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - product_id
+ *               - current_quantity
+ *               - reorder_level
+ *             properties:
+ *               product_id:
+ *                 type: string
+ *               current_quantity:
+ *                 type: number
+ *               reorder_level:
+ *                 type: number
+ *     responses:
+ *       201:
+ *         description: Stock alert created
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/StockAlert'
+ */
+
+/**
+ * @swagger
+ * /api/v1/stock-alerts/{id}/dismiss:
+ *   patch:
+ *     summary: Dismiss a stock alert
+ *     tags: [StockAlerts]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the alert to dismiss
+ *     responses:
+ *       200:
+ *         description: Stock alert dismissed
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/StockAlert'
  */

@@ -15,6 +15,9 @@ import roleRouter from "./routes/role.route.js";
 import authRouter from "./routes/auth.route.js";
 import userRouter from "./routes/user.route.js";
 import categoryRouter from "./routes/category.route.js";
+import productRouter from "./routes/product.route.js";
+import saleRouter from "./routes/sale.route.js";
+import stockAlertRouter from "./routes/stock_alert.route.js";
 
 dotenv.config();
 const app = express();
@@ -62,6 +65,9 @@ app.use("/api/v1/roles", roleRouter);
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/categories", categoryRouter);
+app.use("/api/v1/products", productRouter);
+app.use("/api/v1/sales", saleRouter);
+app.use("/api/v1/stock-alerts", stockAlertRouter);
 
 app.get("/socket-io", (req, res) => {
   sendSuccess(res, 200, "Socket.IO Server is running");

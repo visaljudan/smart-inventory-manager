@@ -20,8 +20,6 @@ export const auth = async (req, res, next) => {
       return sendError(res, 404, "User not found!");
     }
 
-    console.log("user : ", user);
-
     req.user = user;
     next();
   } catch (error) {
