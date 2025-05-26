@@ -23,3 +23,7 @@ export const emitSaleEvent = (event, data) => {
 export const emitStockAlertEvent = (event, data) => {
   io.emit(event, data);
 };
+
+export const emitCustomerEvent = (event, data) => {
+  io.emit(event, data);
+};

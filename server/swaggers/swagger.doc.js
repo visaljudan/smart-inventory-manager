@@ -698,57 +698,112 @@
  *     security:
  *       - bearerAuth: []
  *     requestBody:
- *       description: Sale details with list of products and optional sale date
  *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
- *             required:
- *               - products
  *             properties:
+ *               customerId:
+ *                 type: string
+ *                 description: ID of the customer
+ *               name:
+ *                 type: string
+ *               phone:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               address:
+ *                 type: string
+ *               note:
+ *                 type: string
  *               saleDate:
  *                 type: string
- *                 format: date-time
- *                 example: 2025-05-20T15:30:00.000Z
+ *                 format: date
  *               products:
  *                 type: array
  *                 items:
  *                   type: object
- *                   required:
- *                     - productId
- *                     - quantity
  *                   properties:
  *                     productId:
  *                       type: string
- *                       example: "6650e65d3f607912e2a419b1"
  *                     quantity:
  *                       type: number
- *                       example: 3
+ *                   required:
+ *                     - productId
+ *                     - quantity
+ *             required:
+ *               - products
  *     responses:
  *       201:
  *         description: Sale created successfully
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Sale'
  *       400:
- *         description: Bad request or validation error
+ *         description: Bad request
  *       401:
  *         description: Unauthorized
+ *       500:
+ *         description: Internal server error
+ */
+
+/**
+ * @swagger
+ * /api/v1/sales:
+ *   get:
+ *     summary: Get all sales with optional filters
+ *     tags: [Sales]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *         description: Page number 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *         description: Number of items per page
+ *       - in: query
+ *         name: sort
+ *         schema:
+ *           type: string
+ *         description: Field to sort by createdAt
+ *       - in: query
+ *         name: order
+ *         schema:
+ *           type: string
+ *           enum: [asc, desc]
+ *         description: Sort order (asc or desc)
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Search keyword
+ *       - in: query
+ *         name: date
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Filter by sale date
+ *     responses:
+ *       200:
+ *         description: Sales fetched successfully
+ *       500:
+ *         description: Internal server error
  */
 
 /**
  * @swagger
  * /api/v1/sales/{id}:
  *   get:
- *     summary: Get a single sale by ID
+ *     summary: Get a sale by ID
  *     tags: [Sales]
  *     security:
  *       - bearerAuth: []
  *     parameters:
- *       - name: id
- *         in: path
+ *       - in: path
+ *         name: id
  *         required: true
  *         schema:
  *           type: string
@@ -756,35 +811,12 @@
  *     responses:
  *       200:
  *         description: Sale fetched successfully
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Sale'
  *       400:
- *         description: Invalid ID
+ *         description: Invalid sale ID format
  *       404:
  *         description: Sale not found
- */
-
-/**
- * @swagger
- * /api/v1/sales:
- *   get:
- *     summary: Get a single sale by ID
- *     tags: [Sales]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Sale fetched successfully
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Sale'
- *       400:
- *         description: Invalid ID
- *       404:
- *         description: Sale not found
+ *       500:
+ *         description: Internal server error
  */
 
 ///// Stock Alert /////
@@ -864,4 +896,227 @@
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/StockAlert'
+ */
+
+///// Customer/////
+/**
+ * @swagger
+ * /api/v1/customers:
+ *   post:
+ *     summary: Create a new customer
+ *     tags: [Customers]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: "John Doe"
+ *               phone:
+ *                 type: string
+ *                 example: "0123456789"
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: "john@example.com"
+ *               address:
+ *                 type: string
+ *                 example: "123 Street, Phnom Penh"
+ *               note:
+ *                 type: string
+ *                 example: "Regular customer"
+ *     responses:
+ *       201:
+ *         description: Customer created successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Customer created successfully.
+ *                 data:
+ *                   $ref: '#/components/schemas/Customer'
+ *       400:
+ *         description: Bad request – missing name or invalid data
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Server error
+ */
+
+/**
+ * @swagger
+ * /api/v1/customers:
+ *   post:
+ *     summary: Create a new customer
+ *     tags: [Customers]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *             properties:
+ *               name:
+ *                 type: string
+ *               phone:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               address:
+ *                 type: string
+ *               note:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Customer created successfully.
+ *       400:
+ *         description: Validation error
+ *       401:
+ *         description: Unauthorized
+ */
+
+/**
+ * @swagger
+ * /api/v1/customers:
+ *   get:
+ *     summary: Get a paginated list of customers
+ *     tags: [Customers]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *         description: Page number
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *         description: Number of customers per page
+ *       - in: query
+ *         name: sort
+ *         schema:
+ *           type: string
+ *         description: Field to sort by createdAt
+ *       - in: query
+ *         name: order
+ *         schema:
+ *           type: string
+ *           enum: [asc, desc]
+ *         description: Sort order
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Search by name, phone, email, address, or note
+ *     responses:
+ *       200:
+ *         description: Customers fetched successfully.
+ */
+
+/**
+ * @swagger
+ * /api/v1/customers/{id}:
+ *   get:
+ *     summary: Get a single customer by ID
+ *     tags: [Customers]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Customer ID
+ *     responses:
+ *       200:
+ *         description: Customer fetched successfully
+ *       400:
+ *         description: Invalid ID format
+ *       404:
+ *         description: Customer not found
+ */
+
+/**
+ * @swagger
+ * /api/v1/customers/{id}:
+ *   put:
+ *     summary: Update a customer by ID
+ *     tags: [Customers]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Customer ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               phone:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               address:
+ *                 type: string
+ *               note:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Customer updated successfully
+ *       400:
+ *         description: Invalid ID or request
+ *       404:
+ *         description: Customer not found
+ */
+
+/**
+ * @swagger
+ * /api/v1/customers/{id}:
+ *   delete:
+ *     summary: Delete a customer by ID
+ *     tags: [Customers]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Customer ID
+ *     responses:
+ *       200:
+ *         description: Customer deleted successfully
+ *       400:
+ *         description: Invalid ID format
+ *       404:
+ *         description: Customer not found
  */

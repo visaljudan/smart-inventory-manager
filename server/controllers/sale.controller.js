@@ -4,10 +4,20 @@ import Product from "../models/product.model.js";
 import { sendError, sendSuccess } from "../utils/response.js";
 import { emitSaleEvent } from "../utils/socketioFunctions.js";
 import StockAlert from "../models/stock_alert.model.js";
+import Customer from "../models/customer.model.js";
 
 export const createSale = async (req, res, next) => {
   try {
-    const { products, saleDate } = req.body;
+    const {
+      customerId,
+      name,
+      phone,
+      email,
+      address,
+      note,
+      products,
+      saleDate,
+    } = req.body;
     const userId = req.user._id;
 
     if (!userId) {
@@ -20,6 +30,23 @@ export const createSale = async (req, res, next) => {
         400,
         "Products array is required and must not be empty."
       );
+    }
+
+    if (customerId && !mongoose.Types.ObjectId.isValid(customerId)) {
+      return sendError(res, 400, "Invalid customer ID format.");
+    }
+
+    const customer = await Customer.findById(customerId);
+    if (!customer) {
+      return sendError(res, 400, "Customer not found.");
+    }
+
+    if (customer) {
+      if (name) name = customer.name;
+      if (phone) phone = customer.phone;
+      if (email) email = customer.email;
+      if (address) address = customer.address;
+      if (note) note = customer.note;
     }
 
     let totalAmount = 0;
@@ -83,6 +110,12 @@ export const createSale = async (req, res, next) => {
 
     const sale = new Sale({
       userId,
+      customerId,
+      name,
+      phone,
+      email,
+      address,
+      note,
       products: saleProducts,
       totalAmount,
       saleDate,
@@ -123,6 +156,15 @@ export const getSales = async (req, res, next) => {
       query.saleDate = { $gte: start, $lte: end };
     }
 
+    if (search) {
+      query.$or = [
+        { name: { $regex: new RegExp(search, "i") } },
+        { phone: { $regex: new RegExp(search, "i") } },
+        { email: { $regex: new RegExp(search, "i") } },
+        { address: { $regex: new RegExp(search, "i") } },
+        { note: { $regex: new RegExp(search, "i") } },
+      ];
+    }
     const sales = await Sale.find(query)
       .populate("userId", "name email")
       .populate("products.productId", "name sku")
