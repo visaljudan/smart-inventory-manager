@@ -18,6 +18,7 @@ import categoryRouter from "./routes/category.route.js";
 import productRouter from "./routes/product.route.js";
 import saleRouter from "./routes/sale.route.js";
 import stockAlertRouter from "./routes/stock_alert.route.js";
+import customerRouter from "./routes/customer.route.js";
 
 dotenv.config();
 const app = express();
@@ -68,6 +69,7 @@ app.use("/api/v1/categories", categoryRouter);
 app.use("/api/v1/products", productRouter);
 app.use("/api/v1/sales", saleRouter);
 app.use("/api/v1/stock-alerts", stockAlertRouter);
+app.use("/api/v1/customers", customerRouter);
 
 app.get("/socket-io", (req, res) => {
   sendSuccess(res, 200, "Socket.IO Server is running");
