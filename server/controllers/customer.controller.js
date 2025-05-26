@@ -53,7 +53,7 @@ export const getCustomers = async (req, res, next) => {
     } = req.query;
 
     const skip = (page - 1) * limit;
-    const query = { userId: req.user._id };
+    const query = { userId: req.user?._id };
 
     if (search) {
       query.$or = [
