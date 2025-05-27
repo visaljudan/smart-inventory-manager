@@ -7,7 +7,7 @@ import { emitCustomerEvent } from "../utils/socketioFunctions.js";
 export const createCustomer = async (req, res, next) => {
   try {
     const { name, phone, email, address, note } = req.body;
-    const userId = req.user._id;
+    const userId = req.user?._id;
 
     if (!name) {
       return sendError(res, 400, "Name is required to create a customer.");
@@ -24,7 +24,7 @@ export const createCustomer = async (req, res, next) => {
 
     await customer.save();
 
-    const populatedCustomer = await Customer.findById(customer._id).populate(
+    const populatedCustomer = await Customer.findById(customer?._id).populate(
       "userId",
       "name email"
     );
@@ -87,7 +87,7 @@ export const getCustomers = async (req, res, next) => {
 export const getCustomer = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const userId = req.user._id;
+    const userId = req.user?._id;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return sendError(res, 400, "Invalid Customer ID format.");
@@ -118,7 +118,7 @@ export const updateCustomer = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { name, phone, email, address, note } = req.body;
-    const userId = req.user._id;
+    const userId = req.user?._id;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return sendError(res, 400, "Invalid Customer ID format.");
@@ -158,7 +158,7 @@ export const updateCustomer = async (req, res, next) => {
 export const deleteCustomer = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const userId = req.user._id;
+    const userId = req.user?._id;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return sendError(res, 400, "Invalid Customer ID format.");
