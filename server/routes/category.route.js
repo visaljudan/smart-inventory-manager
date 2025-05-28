@@ -6,14 +6,15 @@ import {
   getCategory,
   updateCategory,
 } from "../controllers/category.controller.js";
+import { auth } from "../utils/verify.js";
 
 const categoryRouter = express.Router();
 
 // Compeleted
-categoryRouter.post("/", createCategory);
-categoryRouter.get("/", getCategories);
-categoryRouter.get("/:id", getCategory);
-categoryRouter.patch("/:id", updateCategory);
-categoryRouter.delete("/:id", deleteCategory);
+categoryRouter.post("/", auth, createCategory);
+categoryRouter.get("/", auth, getCategories);
+categoryRouter.get("/:id", auth, getCategory);
+categoryRouter.patch("/:id", auth, updateCategory);
+categoryRouter.delete("/:id", auth, deleteCategory);
 
 export default categoryRouter;

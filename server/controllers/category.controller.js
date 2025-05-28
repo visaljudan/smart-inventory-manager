@@ -4,15 +4,17 @@ import Category from "../models/category.model.js";
 import { sendError, sendSuccess } from "../utils/response.js";
 import { emitCategoryEvent } from "../utils/socketioFunctions.js";
 
-// Compeleted
+// Create
 export const createCategory = async (req, res, next) => {
   try {
     const { name } = req.body;
+    const userId = req.user?._id;
 
     if (!name)
       return sendError(res, 400, "Name is required to create a category.");
 
     const existingName = await Category.findOne({
+      user: userId,
       name: { $regex: new RegExp(`^${name}$`, "i") },
     });
     if (existingName)
@@ -20,12 +22,13 @@ export const createCategory = async (req, res, next) => {
 
     const slug = slugify(name, { lower: true, strict: true, trim: true });
     const existingSlug = await Category.findOne({
+      user: userId,
       slug: { $regex: new RegExp(`^${slug}$`, "i") },
     });
     if (existingSlug)
       return sendError(res, 409, "Category slug already exists.");
 
-    const category = new Category({ name, slug });
+    const category = new Category({ user: userId, name, slug });
     await category.save();
 
     emitCategoryEvent("categoryCreated", category);
@@ -36,6 +39,7 @@ export const createCategory = async (req, res, next) => {
   }
 };
 
+// Get All
 export const getCategories = async (req, res, next) => {
   try {
     const {
@@ -46,8 +50,10 @@ export const getCategories = async (req, res, next) => {
       search = "",
       status,
     } = req.query;
+
+    const userId = req.user?._id;
     const skip = (page - 1) * limit;
-    const query = {};
+    const query = { user: userId };
 
     if (status && !["active", "inactive"].includes(status)) {
       return sendError(res, 400, "Status must be 'active' or 'inactive'.");
@@ -81,14 +87,17 @@ export const getCategories = async (req, res, next) => {
   }
 };
 
+// Get One
 export const getCategory = async (req, res, next) => {
   try {
     const { id } = req.params;
+    const userId = req.user?._id;
 
-    if (!mongoose.Types.ObjectId.isValid(id))
+    if (!mongoose.Types.ObjectId.isValid(id)) {
       return sendError(res, 400, "Invalid Category ID format.");
+    }
 
-    const category = await Category.findById(id);
+    const category = await Category.findOne({ _id: id, user: userId });
     if (!category) return sendError(res, 404, "Category not found");
 
     return sendSuccess(res, 200, "Category fetched successfully", category);
@@ -97,19 +106,23 @@ export const getCategory = async (req, res, next) => {
   }
 };
 
+// Update
 export const updateCategory = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { name, status } = req.body;
+    const userId = req.user?._id;
 
-    if (!mongoose.Types.ObjectId.isValid(id))
+    if (!mongoose.Types.ObjectId.isValid(id)) {
       return sendError(res, 400, "Invalid Category ID format.");
+    }
 
-    const category = await Category.findById(id);
+    const category = await Category.findOne({ _id: id, user: userId });
     if (!category) return sendError(res, 404, "Category not found.");
 
     if (name && name !== category.name) {
       const existingName = await Category.findOne({
+        user: userId,
         name: { $regex: new RegExp(`^${name}$`, "i") },
       });
       if (existingName)
@@ -128,7 +141,6 @@ export const updateCategory = async (req, res, next) => {
     }
 
     await category.save();
-
     emitCategoryEvent("categoryUpdated", category);
 
     return sendSuccess(res, 200, "Category updated successfully", category);
@@ -137,14 +149,17 @@ export const updateCategory = async (req, res, next) => {
   }
 };
 
+// Delete
 export const deleteCategory = async (req, res, next) => {
   try {
     const { id } = req.params;
+    const userId = req.user?._id;
 
-    if (!mongoose.Types.ObjectId.isValid(id))
+    if (!mongoose.Types.ObjectId.isValid(id)) {
       return sendError(res, 400, "Invalid Category ID format");
+    }
 
-    const category = await Category.findByIdAndDelete(id);
+    const category = await Category.findOneAndDelete({ _id: id, user: userId });
     if (!category) return sendError(res, 404, "Category not found");
 
     emitCategoryEvent("categoryDeleted", id);
