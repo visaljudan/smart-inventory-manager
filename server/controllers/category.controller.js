@@ -14,7 +14,7 @@ export const createCategory = async (req, res, next) => {
       return sendError(res, 400, "Name is required to create a category.");
 
     const existingName = await Category.findOne({
-      user: userId,
+      userId: userId,
       name: { $regex: new RegExp(`^${name}$`, "i") },
     });
     if (existingName)
@@ -22,13 +22,13 @@ export const createCategory = async (req, res, next) => {
 
     const slug = slugify(name, { lower: true, strict: true, trim: true });
     const existingSlug = await Category.findOne({
-      user: userId,
+      userId: userId,
       slug: { $regex: new RegExp(`^${slug}$`, "i") },
     });
     if (existingSlug)
       return sendError(res, 409, "Category slug already exists.");
 
-    const category = new Category({ user: userId, name, slug });
+    const category = new Category({ userId: userId, name, slug });
     await category.save();
 
     emitCategoryEvent("categoryCreated", category);
@@ -53,7 +53,7 @@ export const getCategories = async (req, res, next) => {
 
     const userId = req.user?._id;
     const skip = (page - 1) * limit;
-    const query = { user: userId };
+    const query = { userId: userId };
 
     if (status && !["active", "inactive"].includes(status)) {
       return sendError(res, 400, "Status must be 'active' or 'inactive'.");
@@ -97,7 +97,7 @@ export const getCategory = async (req, res, next) => {
       return sendError(res, 400, "Invalid Category ID format.");
     }
 
-    const category = await Category.findOne({ _id: id, user: userId });
+    const category = await Category.findOne({ _id: id, userId: userId });
     if (!category) return sendError(res, 404, "Category not found");
 
     return sendSuccess(res, 200, "Category fetched successfully", category);
@@ -117,12 +117,12 @@ export const updateCategory = async (req, res, next) => {
       return sendError(res, 400, "Invalid Category ID format.");
     }
 
-    const category = await Category.findOne({ _id: id, user: userId });
+    const category = await Category.findOne({ _id: id, userId: userId });
     if (!category) return sendError(res, 404, "Category not found.");
 
     if (name && name !== category.name) {
       const existingName = await Category.findOne({
-        user: userId,
+        userId: userId,
         name: { $regex: new RegExp(`^${name}$`, "i") },
       });
       if (existingName)
@@ -159,7 +159,10 @@ export const deleteCategory = async (req, res, next) => {
       return sendError(res, 400, "Invalid Category ID format");
     }
 
-    const category = await Category.findOneAndDelete({ _id: id, user: userId });
+    const category = await Category.findOneAndDelete({
+      _id: id,
+      userId: userId,
+    });
     if (!category) return sendError(res, 404, "Category not found");
 
     emitCategoryEvent("categoryDeleted", id);
