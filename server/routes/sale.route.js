@@ -9,7 +9,7 @@ import { auth } from "../utils/verify.js";
 const saleRouter = express.Router();
 
 saleRouter.post("/", auth, createSale);
-saleRouter.get("/", getSales);
-saleRouter.get("/:id", getSale);
+saleRouter.get("/", auth, getSales);
+saleRouter.get("/:id", auth, getSale);
 
 export default saleRouter;
