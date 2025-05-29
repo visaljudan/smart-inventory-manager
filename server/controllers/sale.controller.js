@@ -32,13 +32,17 @@ export const createSale = async (req, res, next) => {
       );
     }
 
-    if (customerId && !mongoose.Types.ObjectId.isValid(customerId)) {
-      return sendError(res, 400, "Invalid customer ID format.");
-    }
+    let customer = null;
 
-    const customer = await Customer.findById(customerId);
-    if (!customer) {
-      return sendError(res, 400, "Customer not found.");
+    if (customerId) {
+      if (!mongoose.Types.ObjectId.isValid(customerId)) {
+        return sendError(res, 400, "Invalid customer ID format.");
+      }
+
+      customer = await Customer.findById(customerId);
+      if (!customer) {
+        return sendError(res, 400, "Customer not found.");
+      }
     }
 
     if (customer) {
