@@ -146,8 +146,10 @@ export const getSales = async (req, res, next) => {
       date,
     } = req.query;
 
+    const userId = req.user._id;
+
     const skip = (page - 1) * limit;
-    const query = {};
+    const query = { userId: userId };
 
     if (date) {
       const start = new Date(date);
@@ -188,12 +190,13 @@ export const getSales = async (req, res, next) => {
 export const getSale = async (req, res, next) => {
   try {
     const { id } = req.params;
+    const userId = req.user._id;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return sendError(res, 400, "Invalid sale ID format.");
     }
 
-    const sale = await Sale.findById(id)
+    const sale = await Sale.findOne({ _id: id, userId: userId })
       .populate("userId", "name email")
       .populate("products.productId", "name sku");
 
