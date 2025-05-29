@@ -128,6 +128,7 @@ export const createSale = async (req, res, next) => {
     await sale.save();
 
     const populatedSale = await Sale.findById(sale._id)
+      .populate("customerId", "name email phone address note")
       .populate("userId", "name email")
       .populate("products.productId", "name sku");
 
@@ -172,6 +173,7 @@ export const getSales = async (req, res, next) => {
       ];
     }
     const sales = await Sale.find(query)
+      .populate("customerId", "name email phone address note")
       .populate("userId", "name email")
       .populate("products.productId", "name sku")
       .sort({ [sort]: order === "desc" ? -1 : 1 })
@@ -201,6 +203,7 @@ export const getSale = async (req, res, next) => {
     }
 
     const sale = await Sale.findOne({ _id: id, userId: userId })
+      .populate("customerId", "name email phone address note")
       .populate("userId", "name email")
       .populate("products.productId", "name sku");
 
