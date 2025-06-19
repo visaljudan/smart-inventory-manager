@@ -4,6 +4,7 @@ import { sendError, sendSuccess } from "../utils/response.js";
 import { emitProductEvent, emitUserEvent } from "../utils/socketioFunctions.js";
 import Category from "../models/category.model.js";
 import StockAlert from "../models/stock_alert.model.js";
+import Stock from "../models/stock.model.js";
 
 export const createProduct = async (req, res, next) => {
   try {
@@ -266,6 +267,8 @@ export const addProductQuantity = async (req, res, next) => {
     const { addedQuantity } = req.body;
     const userId = req.user._id;
 
+    console.log(typeof addedQuantity);
+
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return sendError(res, 400, "Invalid product ID format.");
     }
@@ -279,13 +282,22 @@ export const addProductQuantity = async (req, res, next) => {
 
     product.quantity += addedQuantity;
     await product.save();
+    // ✅ Record the stock entry
+    await Stock.create({
+      userId: userId,
+      productId: product._id,
+      quantity: addedQuantity,
+      type: "stock in",
+      note: "Product is stock in.",
+    });
 
-    // Stock alert logic
+    // Dismiss stock alerts if necessary
     if (product.quantity > product.reorderLevel) {
-      await StockAlert.updateMany(
+      const result = await StockAlert.updateMany(
         { productId: product._id, userId, status: "active" },
         { status: "dismissed" }
       );
+      console.log("StockAlert update result:", result);
     }
 
     const populatedProduct = await Product.findById(product._id)

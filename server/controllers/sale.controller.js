@@ -2,9 +2,10 @@ import mongoose from "mongoose";
 import Sale from "../models/sale.model.js";
 import Product from "../models/product.model.js";
 import { sendError, sendSuccess } from "../utils/response.js";
-import { emitSaleEvent } from "../utils/socketioFunctions.js";
+import { emitProductEvent, emitSaleEvent } from "../utils/socketioFunctions.js";
 import StockAlert from "../models/stock_alert.model.js";
 import Customer from "../models/customer.model.js";
+import Stock from "../models/stock.model.js";
 
 export const createSale = async (req, res, next) => {
   try {
@@ -33,6 +34,11 @@ export const createSale = async (req, res, next) => {
     }
 
     let customer = null;
+    let customerName = name;
+    let customerPhone = phone;
+    let customerEmail = email;
+    let customerAddress = address;
+    let customerNote = note;
 
     if (customerId) {
       if (!mongoose.Types.ObjectId.isValid(customerId)) {
@@ -43,14 +49,12 @@ export const createSale = async (req, res, next) => {
       if (!customer) {
         return sendError(res, 400, "Customer not found.");
       }
-    }
 
-    if (customer) {
-      if (name) name = customer.name;
-      if (phone) phone = customer.phone;
-      if (email) email = customer.email;
-      if (address) address = customer.address;
-      if (note) note = customer.note;
+      customerName = customer.name;
+      customerPhone = customer.phone;
+      customerEmail = customer.email;
+      customerAddress = customer.address;
+      customerNote = customer.note;
     }
 
     let totalAmount = 0;
@@ -62,6 +66,7 @@ export const createSale = async (req, res, next) => {
       if (!productId || !mongoose.Types.ObjectId.isValid(productId)) {
         return sendError(res, 400, "Invalid or missing product ID.");
       }
+
       if (typeof quantity !== "number" || quantity <= 0) {
         return sendError(res, 400, "Quantity must be a positive number.");
       }
@@ -86,6 +91,16 @@ export const createSale = async (req, res, next) => {
       product.quantity -= quantity;
       await product.save();
 
+      // ✅ Create stock out record for each product sold
+      await Stock.create({
+        userId: userId,
+        productId: product._id,
+        quantity: quantity,
+        type: "stock out",
+        note: `Sold ${quantity} unit(s) of ${product.name}.`,
+      });
+
+      // 🔔 Check and create low-stock alert if needed
       if (product.quantity <= product.reorderLevel) {
         const existingAlert = await StockAlert.findOne({
           productId: product._id,
@@ -101,6 +116,7 @@ export const createSale = async (req, res, next) => {
             reorderLevel: product.reorderLevel,
             status: "active",
           });
+          emitProductEvent("productUpdated", product);
         }
       }
 
@@ -115,11 +131,11 @@ export const createSale = async (req, res, next) => {
     const sale = new Sale({
       userId,
       customerId,
-      name,
-      phone,
-      email,
-      address,
-      note,
+      name: customerName,
+      phone: customerPhone,
+      email: customerEmail,
+      address: customerAddress,
+      note: customerNote,
       products: saleProducts,
       totalAmount,
       saleDate,
@@ -216,3 +232,4 @@ export const getSale = async (req, res, next) => {
     next(error);
   }
 };
+

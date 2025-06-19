@@ -53,7 +53,7 @@ export const getRoles = async (req, res, next) => {
       sort = "createdAt",
       order = "desc",
       search = "",
-      status,
+      status, 
     } = req.query;
 
     const skip = (page - 1) * limit;

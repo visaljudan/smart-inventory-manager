@@ -108,3 +108,40 @@ export const dismissStockAlert = async (req, res, next) => {
     next(err);
   }
 };
+
+export const readStockAlert = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return sendError(res, 400, "Invalid alert ID format.");
+    }
+
+    const alert = await StockAlert.findOneAndUpdate(
+      { _id: id, userId: req.user._id },
+      { isRead: true },
+      { new: true }
+    );
+
+    console.log(id);
+
+    if (!alert) {
+      return sendError(res, 404, "Alert not found or already read.");
+    }
+
+    const populatedStockAlert = await StockAlert.findById(alert._id)
+      .populate("userId", "name email")
+      .populate("productId", "name sku");
+
+    emitStockAlertEvent("stockAlertRead", populatedStockAlert);
+
+    return sendSuccess(
+      res,
+      200,
+      "Stock alert marked as read.",
+      populatedStockAlert
+    );
+  } catch (err) {
+    next(err);
+  }
+};

@@ -20,6 +20,10 @@ const stockAlertSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    isRead: {
+      type: Boolean,
+      default: false,
+    },
     status: {
       type: String,
       enum: ["active", "dismissed"],
